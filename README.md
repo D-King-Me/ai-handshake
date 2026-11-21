@@ -37,6 +37,7 @@
 python hello.py --ping all          # 逐家握手，出结果表
 python hello.py --ping deepseek     # 只测一家
 python hello.py --say "你好" --only local
+python plugin.py                    # 只看插件清单（内置 + plugins/）
 ```
 
 输出示例：
@@ -64,11 +65,38 @@ OpenAI         gpt-4o-mini           隔离   0      缺钥匙（环境变量 OP
    export LOCAL_MODEL=qwen2.5-1.5b
    ```
 2. **`keys.json`** —— 照 `keys.example.json` 改名，填：`{"ark": "...", "deepseek": "...", "openai": ""}`
-3. **明文文件兜底** —— 在子类里设 `key_file = "/path/to/key.txt"`，适合只在本机跑的服务。
+3. **明文文件兜底** —— 在插件里写 `"key_file": "/path/to/key.txt"`，适合只在本机跑的服务。
 
 没配钥匙的那家不会报错，只会标成 `11 隔离`。
 
-## 加一家新的
+## 加一家新的：写个插件就行，不用改代码
+
+往 `plugins/` 丢一个 json，重启即生效：
+
+```json
+{
+  "name": "moonshot",
+  "label": "月之暗面",
+  "base_url": "https://api.moonshot.cn/v1",
+  "env_key": "MOONSHOT_API_KEY",
+  "env_model": "MOONSHOT_MODEL",
+  "model": "moonshot-v1-8k",
+  "timeout": 60
+}
+```
+
+只有 `name` 和 `base_url` 必填，其余缺省按基类默认值。**同名插件会顶掉内置同名适配器**，所以想把 OpenAI 的默认模型换掉，直接写个 `plugins/openai.json` 覆盖，不用动一行代码。
+
+仓库里自带的四个 json（`ark` / `deepseek` / `openai` / `local`）就是内置四家的插件写法，照抄改字段即可。
+
+插件目录可以用 `HANDSHAKE_PLUGINS` 环境变量指到别处。
+
+```python
+from plugin import all_adapters_with_plugins
+adapters = all_adapters_with_plugins()   # 内置 + plugins/
+```
+
+### 非要写代码的话
 
 ```python
 class MyProvider(Adapter):
@@ -80,7 +108,7 @@ class MyProvider(Adapter):
     model = "my-model"
 ```
 
-放进 `REGISTRY` 就完事。
+放进 `base.py` 的 `REGISTRY` 就完事。
 
 ## 透传厂商私有参数
 
@@ -104,7 +132,9 @@ MIT。见 [LICENSE](LICENSE)。
 
 ## English
 
-`ai-handshake` is a zero-dependency, stdlib-only adapter that talks to Ark (Doubao), DeepSeek, OpenAI, and any OpenAI-compatible local server through a single `chat(messages) -> text` interface. Providers are declared as subclasses with four fields, so adding one costs a class, not a refactor.
+`ai-handshake` is a zero-dependency, stdlib-only adapter that talks to Ark (Doubao), DeepSeek, OpenAI, and any OpenAI-compatible local server through a single `chat(messages) -> text` interface.
+
+Providers are declared as JSON files under `plugins/` — adding one costs a file, not a refactor; a plugin with the same `name` overrides the built-in. No `plugins/` directory at all still works, falling back to four built-ins.
 
 Handshakes return a two-bit state (`01` ok, `10` slow, `00` unsure, `11` isolated) instead of a boolean, so an isolated provider is never even called.
 

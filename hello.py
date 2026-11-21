@@ -19,7 +19,13 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 
-from base import STATE_ISOLATED, STATE_OK, all_adapters, load_keys  # noqa: E402
+from base import STATE_ISOLATED, STATE_OK, load_keys  # noqa: E402
+try:  # 有插件层就用插件层（内置 + plugins/ 目录）
+    from plugin import all_adapters_with_plugins as _load_all
+    _LOAD_MODE = "插件"
+except Exception:  # 插件层坏了也不影响主链路
+    from base import all_adapters as _load_all
+    _LOAD_MODE = "内置"
 
 LOG_DIR = os.path.join(HERE, "日志")
 LOG_FILE = os.path.join(LOG_DIR, "握手记录.jsonl")
@@ -55,7 +61,7 @@ def main():
     ap.add_argument("--only", default="")
     args = ap.parse_args()
 
-    adapters = pick(all_adapters(), args.only or args.ping)
+    adapters = pick(_load_all(), args.only or args.ping)
     rows = []
 
     if args.say:
@@ -75,7 +81,8 @@ def main():
                              "ms": 0, "note": str(e)[:60]})
     else:
         keys = load_keys()
-        print("keys.json：%s" % ("已读到 %d 家" % len(keys) if keys else "没有（可只用环境变量）"))
+        print("来源：%s   keys.json：%s" % (
+            _LOAD_MODE, "已读到 %d 家" % len(keys) if keys else "没有（可只用环境变量）"))
         print("-" * 68)
         print("%-14s %-22s %-6s %-6s %s" % ("家", "模型", "状态", "ms", "备注"))
         print("-" * 68)
