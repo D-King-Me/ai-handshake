@@ -1,0 +1,20 @@
+# 真实钥匙，永远不进仓库
+keys.json
+*.key
+*.pem
+
+# 握手日志（本地运行产物）
+日志/
+*.jsonl
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# 编辑器 / 系统
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
