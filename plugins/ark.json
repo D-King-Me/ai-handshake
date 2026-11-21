@@ -1,0 +1,9 @@
+{
+  "name": "ark",
+  "label": "豆包方舟",
+  "base_url": "https://ark.cn-beijing.volces.com/api/v3",
+  "env_key": "ARK_API_KEY",
+  "env_model": "ARK_MODEL",
+  "model": "",
+  "timeout": 60
+}

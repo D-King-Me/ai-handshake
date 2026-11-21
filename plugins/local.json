@@ -1,0 +1,9 @@
+{
+  "name": "local",
+  "label": "本机兼容服务",
+  "base_url": "http://127.0.0.1:8080/v1",
+  "env_key": "",
+  "env_model": "LOCAL_MODEL",
+  "model": "qwen2.5-1.5b",
+  "timeout": 40
+}
