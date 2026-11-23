@@ -25,6 +25,9 @@ REQUIRED = ("name", "base_url")
 KNOWN = ("name", "label", "base_url", "env_key", "env_model", "model",
          "timeout", "key_file")
 
+# 这几类备注算“硬伤”：文件会被拒载，所以不能只提示不计数。
+FATAL_PREFIX = ("缺必填", "JSON", "顶层", "base_url 不是", "timeout")
+
 
 def check_one(path: Path):
     """返回 (ok, name, notes)。不抛错。"""
@@ -42,18 +45,17 @@ def check_one(path: Path):
     for k in data:
         if k not in KNOWN:
             notes.append("未知字段 %s（会被忽略）" % k)
-    if str(data.get("base_url") or "") and not str(data["base_url"]).startswith("http"):
+    url = str(data.get("base_url") or "")
+    if url and not url.startswith("http"):
         notes.append("base_url 不是 http(s) 开头")
     try:
-        timeout = int(data.get("timeout") or 60)
-        if timeout <= 0:
+        if int(data.get("timeout") or 60) <= 0:
             notes.append("timeout 必须为正整数")
     except Exception:
         notes.append("timeout 不是整数")
 
     name = str(data.get("name") or "-")
-    ok = not any(n.startswith("缺必填") or n.startswith("JSON") or n == "顶层不是对象"
-                 for n in notes)
+    ok = not any(n.startswith(FATAL_PREFIX) for n in notes)
     return ok, name, notes
 
 
