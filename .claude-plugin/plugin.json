@@ -1,0 +1,16 @@
+{
+  "name": "ai-handshake",
+  "version": "1.0.0",
+  "description": "一个接口接通多家大模型：Ark（豆包）、DeepSeek、OpenAI 和任意 OpenAI 兼容的本地服务。握手不返回布尔，返回四态两比特。",
+  "author": { "name": "D-King-Me" },
+  "homepage": "https://github.com/D-King-Me/ai-handshake",
+  "repository": "https://github.com/D-King-Me/ai-handshake",
+  "license": "MIT",
+  "keywords": ["llm", "adapter", "openai-compatible", "ark", "doubao", "deepseek", "handshake"],
+  "commands": [
+    "./commands/handshake-ping.md",
+    "./commands/handshake-say.md",
+    "./commands/handshake-add.md"
+  ],
+  "skills": ["./skills/handshake"]
+}
